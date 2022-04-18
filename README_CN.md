@@ -10,7 +10,7 @@
 
 ![产品效果图](./resources/images/DFR0971.png) 
 
-## 产品链接（（[www.dfrobot.com](www.dfrobot.com)）
+## 产品链接（[www.dfrobot.com](www.dfrobot.com)）
     SKU: DFR0971 
 
 ## 目录
