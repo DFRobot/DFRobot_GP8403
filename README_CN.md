@@ -64,7 +64,7 @@
 	void store(void);
   /**
    * @brief 调用函数输出正弦波
-   * @param amp 设点正弦波幅度Vp
+   * @param amp 设置正弦波幅度Vp
    * @param freq 设置正弦波频率f
    * @param offset 设置正弦波直流偏置Voffset
    * @param channel 输出通道 0:通道0;1:通道1;2:全部通道
@@ -72,19 +72,19 @@
 	void outputSin(uint16_t amp, uint16_t freq, uint16_t offset,uint8_t channel);
   /**
    * @brief 调用函数输出三角波
-   * @param amp 设点正弦波幅度Vp
-   * @param freq 设置正弦波频率f
-   * @param offset 设置正弦波直流偏置Voffset
+   * @param amp 设置三角波幅度Vp
+   * @param freq 设置三角波频率f
+   * @param offset 设置三角波直流偏置Voffset
    * @param dutyCycle 设定三角（锯齿）波占空比
    * @param channel 输出通道 0:通道0;1:通道1;2:全部通道
    */
 	void outputTriangle(uint16_t amp, uint16_t freq, uint16_t offset, int8_t dutyCycle, uint8_t channel);
   /**
    * @brief 调用函数输出方波
-   * @param amp 设点正弦波幅度Vp
-   * @param freq 设置正弦波频率f
-   * @param offset 设置正弦波直流偏置Voffset
-   * @param dutyCycle 设定方波波占空比
+   * @param amp 设置方波幅度Vp
+   * @param freq 设置方波频率f
+   * @param offset 设置方波直流偏置Voffset
+   * @param dutyCycle 设定方波占空比
    * @param channel 输出通道 0:通道0;1:通道1;2:全部通道
    */
 	void outputSquare(uint16_t amp, uint16_t freq, uint16_t offset, int8_t dutyCycle, uint8_t channel);
