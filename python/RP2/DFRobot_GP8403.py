@@ -10,7 +10,10 @@
   @url  https://github.com/couillonnade/DFRobot_GP8403
 '''
 
-import time
+import machine
+import utime
+import ustruct
+import sys
 
   
 ##Select DAC output voltage of 0-5V
@@ -45,23 +48,27 @@ class DFRobot_GP8403():
   GP8302_STORE_TIMING_DELAY = 10
   
     
-  def __init__(self,addr):
+  def __init__(self, addr, sclPin, sdaPin, i2cFreq):
     self._addr = addr
     self.outPutSetRange = 0x01
     self.voltage = 5000
     self._scl     = 3
     self._sda     = 2
     self.dataTransmission = 0
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    self.i2c = smbus.SMBus(1)
 
+    # Initialize I2C with pins
+    self.i2c = machine.I2C(0,
+                  scl=machine.Pin(sclPin),
+                  sda=machine.Pin(sdaPin),
+                  freq=i2cFreq)
+    
 
   def begin(self):
     '''!
       @param Initialize the sensor
     '''
-    if(self.i2c.read_byte(self._addr) != 0):
+
+    if (self.i2c.readfrom(self._addr, 1) != 0):
       return 0
     return 1
 
@@ -74,7 +81,7 @@ class DFRobot_GP8403():
       self.voltage = 5000
     elif mode == OUTPUT_RANGE_10V :
       self.voltage = 10000
-    self.i2c.write_word_data(self._addr,self.outPutSetRange,mode)
+    self.i2c.writeto_mem(self._addr, self.outPutSetRange, mode)
 
   def set_DAC_out_voltage(self,data,channel):
     '''!
