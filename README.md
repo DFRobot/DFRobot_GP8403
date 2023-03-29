@@ -8,8 +8,6 @@ This I2C to 0-5V/0-10V DAC module can be used to output voltage of 0-5V or 0-10V
 3. The output voltage config will be lost after the module is powered down. Save the config if you want to use it for the next power-up.
 
 
-![产品效果图](./resources/images/DFR0971.png) 
-
 ## Product Link（[www.dfrobot.com](www.dfrobot.com)）
     SKU: DFR0971 
 
