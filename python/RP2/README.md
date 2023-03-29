@@ -64,8 +64,8 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
 
 | Python  | Work Well | Work Wrong | Untested | Remarks |
 | ------- | :--: | :----: | :----: | ---- |
-| Python2 |  √   |        |        |      |
-| Python3 |  √   |        |        |      |
+| Python3 |     |        |    √    |      |
+| MicroPython 1.19 |  √   |        |        |      |
 
 
 ## History
