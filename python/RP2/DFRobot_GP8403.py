@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*
-'''!
-  @file  DFRobot_GP8403.py
-  @brief This is a function library of the DAC module.
-  @copyright  Copyright (c) 2023 Couillonnade
-  @license  The MIT License (MIT)
-  @author  [Rémi]
-  @version  V1.0
-  @date  2023-03-29
-  @url  https://github.com/couillonnade/DFRobot_GP8403
-'''
+"""
+@file  DFRobot_GP8403.py
+@brief This is a function library of the DAC module.
+@copyright  Copyright (c) 2023 Couillonnade
+@license  The MIT License (MIT)
+@author  [Rémi]
+@version  V1.0
+@date  2023-03-29
+@url  https://github.com/couillonnade/DFRobot_GP8403
+"""
 
 import machine
 import utime
