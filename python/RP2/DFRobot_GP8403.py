@@ -99,7 +99,7 @@ class DfrobotGP8403():
             self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, data)
 
     # TODO: change this to bit banging to be in line with
-    # spec that is not i2c compliant.
+    # the spec that is not i2c compliant.
     def store(self):
         """
         Save the present current config, after the config is saved successfully,
