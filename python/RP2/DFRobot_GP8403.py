@@ -55,7 +55,7 @@ class DfrobotGP8403():
         self._sda = sdapin
         self.dataTransmission = 0
 
-        # Initialize I2C with pins
+        # Initialize I2C with Pins
         self.i2c = machine.I2C(0,
                                scl=machine.Pin(sclpin),
                                sda=machine.Pin(sdapin),
