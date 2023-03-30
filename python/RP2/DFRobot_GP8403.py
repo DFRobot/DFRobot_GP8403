@@ -52,8 +52,8 @@ class DFRobot_GP8403():
     self._addr = addr
     self.outPutSetRange = 0x01
     self.voltage = 5000
-    self._scl     = 3
-    self._sda     = 2
+    self._scl     = sclPin
+    self._sda     = sdaPin
     self.dataTransmission = 0
 
     # Initialize I2C with pins
