@@ -92,55 +92,13 @@ class DFRobot_GP8403():
     self.dataTransmission = int(self.dataTransmission) << 4
     self._send_data(self.dataTransmission,channel)
 
-  def store(self):
-    '''!
-      @brief   Save the present current config, after the config is saved successfully, it will be enabled when the module is powered down and restarts
-    '''
-    self.i2c.start()
-    self._send_byte(self.GP8302_STORE_TIMING_HEAD)
-    self.i2c.stop()
-    self.i2c.start()
-    self._send_byte(self.GP8302_STORE_TIMING_ADDR)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD1)
-    self.i2c.stop()
-
-    self.i2c.start()
-    self._send_byte(self._addr<<1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self.i2c.stop()
-
-    utime.sleep(self.GP8302_STORE_TIMING_DELAY)
-
-    self.i2c.start()
-    self._send_byte(self.GP8302_STORE_TIMING_HEAD)
-    self.i2c.stop()
-    self.i2c.start()
-    self._send_byte(self.GP8302_STORE_TIMING_ADDR)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self.i2c.stop()
-
-
   def _send_data(self,data,channel):
-    if channel == 0:
-      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
-      
-    elif channel == 1:
-      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG<<1, data)
-    else:
-      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
-      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG<<1, data)
+      if channel == 0:
+        self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
+        
+      elif channel == 1:
+        self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG<<1, data)
+      else:
+        self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
+        self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG<<1, data)
 
-
-  def _send_byte(self, data):
-    ## TODO: Python Bytes already unsigned, no? Need to check that.
-    #data = data & 0xFF 
-    return self.i2c.write(data.to_bytes(1, 'big'))
-    
-    
