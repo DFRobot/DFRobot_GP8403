@@ -104,7 +104,7 @@ class DfrobotGP8403():
         self._sda = sdapin
         self.dataTransmission = 0
 
-        # Initialize I2C with Pins
+        # Initialize I2C with pins
         self.i2c = machine.I2C(0,
                                scl=machine.Pin(sclpin),
                                sda=machine.Pin(sdapin),
@@ -159,7 +159,7 @@ class DfrobotGP8403():
             self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, data)
 
     # TODO: change this to bit banging to be in line with
-    # the spec that is not i2c compliant.
+    # spec that is not i2c compliant.
     def store(self):
         """
         Save the present current config, after the config is saved successfully,
