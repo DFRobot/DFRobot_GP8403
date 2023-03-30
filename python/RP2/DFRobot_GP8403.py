@@ -102,3 +102,48 @@ class DFRobot_GP8403():
         self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
         self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG<<1, data)
 
+
+## TODO: change this to bit banging to be in line with 
+## spec that is not i2c compliant.
+
+  def store(self):
+    '''!
+      @brief   Save the present current config, after the config is saved successfully, it will be enabled when the module is powered down and restarts
+    '''
+    self.i2c.start()
+    self._send_byte(self.GP8302_STORE_TIMING_HEAD)
+    self.i2c.stop()
+    self.i2c.start()
+    self._send_byte(self.GP8302_STORE_TIMING_ADDR)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD1)
+    self.i2c.stop()
+
+    self.i2c.start()
+    self._send_byte(self._addr<<1)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self.i2c.stop()
+
+    utime.sleep(self.GP8302_STORE_TIMING_DELAY)
+
+    self.i2c.start()
+    self._send_byte(self.GP8302_STORE_TIMING_HEAD)
+    self.i2c.stop()
+    self.i2c.start()
+    self._send_byte(self.GP8302_STORE_TIMING_ADDR)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self.i2c.stop()
+
+
+  def _send_byte(self, data):
+    ## ensure 8 bits only
+    data = data & 0xFF 
+    return self.i2c.write(data.to_bytes(1, 'big'))
+    
+    
