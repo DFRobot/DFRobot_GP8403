@@ -17,18 +17,18 @@ import sys
 
   
 ##Select DAC output voltage of 0-5V
-OUTPUT_RANGE_5V             =    0
+OUTPUT_RANGE_5V             =      0
 ##Select DAC output voltage of 0-10V
-OUTPUT_RANGE_10V            =     17
+OUTPUT_RANGE_10V            =      17
 ##Select to output from channel 0
-CHANNEL0                    =     1
+CHANNEL0                    =      1
 ##Select to output from channel 1
-CHANNEL1                    =     2
+CHANNEL1                    =      2
 ##Select to output from all the channels
-CHANNELALL                  =     3
+CHANNELALL                  =      3
   
 class DFRobot_GP8403():
-	## Configure current sensor register   
+  ## Configure current sensor register   
   GP8403_CONFIG_CURRENT_REG   =    0x02
   ## Store function timing start head    
   GP8302_STORE_TIMING_HEAD    =    0x02  
@@ -67,7 +67,6 @@ class DFRobot_GP8403():
     '''!
       @param Initialize the sensor
     '''
-
     if (self.i2c.readfrom(self._addr, 1) != 0):
       return 0
     return 1
@@ -97,101 +96,51 @@ class DFRobot_GP8403():
     '''!
       @brief   Save the present current config, after the config is saved successfully, it will be enabled when the module is powered down and restarts
     '''
-    self._start_signal()
-    self._send_byte(self.GP8302_STORE_TIMING_HEAD, 0, 3, False)
-    self._stop_signal()
-    self._start_signal()
+    self.i2c.start()
+    self._send_byte(self.GP8302_STORE_TIMING_HEAD)
+    self.i2c.stop()
+    self.i2c.start()
     self._send_byte(self.GP8302_STORE_TIMING_ADDR)
     self._send_byte(self.GP8302_STORE_TIMING_CMD1)
-    self._stop_signal()
+    self.i2c.stop()
 
-    self._start_signal()
-    self._send_byte(self._addr<<1, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
-    self._stop_signal()
+    self.i2c.start()
+    self._send_byte(self._addr<<1)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self._send_byte(self.GP8302_STORE_TIMING_CMD2)
+    self.i2c.stop()
 
-    time.sleep(self.GP8302_STORE_TIMING_DELAY)
+    utime.sleep(self.GP8302_STORE_TIMING_DELAY)
 
-    self._start_signal()
-    self._send_byte(self.GP8302_STORE_TIMING_HEAD, 0, 3, False)
-    self._stop_signal()
-    self._start_signal()
+    self.i2c.start()
+    self._send_byte(self.GP8302_STORE_TIMING_HEAD)
+    self.i2c.stop()
+    self.i2c.start()
     self._send_byte(self.GP8302_STORE_TIMING_ADDR)
     self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-    self._stop_signal()
+    self.i2c.stop()
 
 
   def _send_data(self,data,channel):
     if channel == 0:
-      self.i2c.write_word_data(self._addr,self.GP8403_CONFIG_CURRENT_REG,data)
+      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
       
     elif channel == 1:
-      self.i2c.write_word_data(self._addr,self.GP8403_CONFIG_CURRENT_REG<<1,data)
+      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG<<1, data)
     else:
-      self.i2c.write_word_data(self._addr,self.GP8403_CONFIG_CURRENT_REG,data)
-      self.i2c.write_word_data(self._addr,self.GP8403_CONFIG_CURRENT_REG<<1,data)
+      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
+      self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG<<1, data)
 
-  def _start_signal(self):
-    GPIO.output(self._scl, GPIO.HIGH)
-    GPIO.output(self._sda, GPIO.HIGH)
-    time.sleep(self.I2C_CYCLE_BEFORE)
-    GPIO.output(self._sda, GPIO.LOW)
-    time.sleep(self.I2C_CYCLE_AFTER)
-    GPIO.output(self._scl, GPIO.LOW)
-    time.sleep(self.I2C_CYCLE_TOTAL)
-  
-  def _stop_signal(self):
-    GPIO.output(self._sda, GPIO.LOW)
-    time.sleep(self.I2C_CYCLE_BEFORE)
-    GPIO.output(self._scl, GPIO.HIGH)
-    time.sleep(self.I2C_CYCLE_TOTAL)
-    GPIO.output(self._sda, GPIO.HIGH)
-    time.sleep(self.I2C_CYCLE_TOTAL)
 
-  def _recv_ack(self, ack = 0):
-    ack_ = 0
-    error_time = 0
-    GPIO.setup(self._sda, GPIO.IN)
-    time.sleep(self.I2C_CYCLE_BEFORE)
-    GPIO.output(self._scl, GPIO.HIGH)
-    time.sleep(self.I2C_CYCLE_AFTER)
-    while GPIO.input(self._sda) != ack:
-      time.sleep(0.000001)
-      error_time += 1
-      if error_time > 250:
-        break
-    ack_ = GPIO.input(self._sda)
-    time.sleep(self.I2C_CYCLE_BEFORE)
-    GPIO.output(self._scl, GPIO.LOW)
-    time.sleep(self.I2C_CYCLE_AFTER)
-    GPIO.setup(self._sda, GPIO.OUT)
-    return ack_
-
-  def _send_byte(self, data, ack = 0, bits = 8, flag = True):
-    i = bits
-    data = data & 0xFF
-    while i > 0:
-      i -= 1
-      if data & (1 << i):
-        GPIO.output(self._sda, GPIO.HIGH)
-      else:
-        GPIO.output(self._sda, GPIO.LOW)
-      time.sleep(self.I2C_CYCLE_BEFORE)
-      GPIO.output(self._scl, GPIO.HIGH)
-      time.sleep(self.I2C_CYCLE_TOTAL)
-      GPIO.output(self._scl, GPIO.LOW)
-      time.sleep(self.I2C_CYCLE_AFTER)
-    if flag:
-      return self._recv_ack(ack)
-    else:
-      GPIO.output(self._sda, GPIO.LOW)
-      GPIO.output(self._scl, GPIO.HIGH)
-    return ack
+  def _send_byte(self, data):
+    ## TODO: Python Bytes already unsigned, no? Need to check that.
+    #data = data & 0xFF 
+    return self.i2c.write(data.to_bytes(1, 'big'))
+    
     
