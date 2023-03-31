@@ -47,6 +47,7 @@ class DfrobotGP8403():
     # Store procedure interval delay time: 10ms, more than 7ms
     GP8302_STORE_TIMING_DELAY = 10
 
+
     def __init__(self, addr, sclpin, sdapin, i2cfreq, hard = False):
         """
         Initilize the I2C bus.
@@ -226,4 +227,3 @@ class DfrobotGP8403():
             self._sda.low()
             self._scl.high()
         return ack
-
