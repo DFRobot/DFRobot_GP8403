@@ -47,19 +47,41 @@ class DfrobotGP8403():
     # Store procedure interval delay time: 10ms, more than 7ms
     GP8302_STORE_TIMING_DELAY = 10
 
-    def __init__(self, addr, sclpin, sdapin, i2cfreq):
+    def __init__(self, addr, sclpin, sdapin, i2cfreq, hard = False):
+        """
+        Initilize the I2C bus.
+        On Pico, Software I2C (using bit-banging) works on all output-capable pins
+        :param addr: I2C address
+        :param sclpin: SCL pin
+        :param sdapin: SDA pin
+        :param i2cfreq: I2C frequency
+        :param hard: I2C or SoftI2C
+        """
+
         self._addr = addr
         self.outPutSetRange = 0x01
         self.voltage = 5000
-        self._scl = sclpin
-        self._sda = sdapin
+        self._scl = machine.Pin(sclpin)
+        self._sda = machine.Pin(sdapin)
+        self._i2cfreq = i2cfreq
         self.dataTransmission = 0
+        self._hard = hard
 
-        # Initialize I2C with Pins
-        self.i2c = machine.I2C(0,
-                               scl=machine.Pin(sclpin),
-                               sda=machine.Pin(sdapin),
-                               freq=i2cfreq)
+        self._initializeI2C()
+
+    def _initializeI2C(self):
+        if self._hard:
+            self.i2c = machine.I2C(0,
+                                   scl=self._scl,
+                                   sda=self._sda,
+                                   freq=self._i2cfreq)
+        else:
+            # Pylance is not happy with this because stubs are wrong.
+            # see: https://github.com/paulober/Pico-W-Go/issues/55
+            self.i2c = machine.SoftI2C(scl=self._scl,
+                                sda=self._sda,
+                                freq=self._i2cfreq)
+
 
     def begin(self):
         # Initialize the sensor
@@ -98,44 +120,110 @@ class DfrobotGP8403():
             self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
             self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, data)
 
-    # TODO: change this to bit banging to be in line with
-    # the spec that is not i2c compliant.
+
     def store(self):
         """
         Save the present current config, after the config is saved successfully,
         it will be enabled when the module is powered down and restarts
+        
+        This is done with bit-banging because the chip does custom I2C with less than 1 Byte data.
         """
-        self.i2c.start()
-        self._send_byte(self.GP8302_STORE_TIMING_HEAD)
-        self.i2c.stop()
-        self.i2c.start()
+        
+        # Re-initialise Pin because it was initialized 
+        # with SoftI2C and we need to use it as GPIO
+        self._scl = machine.Pin(self._scl, machine.Pin.OUT)
+        self._sda = machine.Pin(self._sda, machine.Pin.OUT)
+
+        self._start_signal()
+        self._send_byte(self.GP8302_STORE_TIMING_HEAD, 0, 3, False)
+        self._stop_signal()
+        self._start_signal()
         self._send_byte(self.GP8302_STORE_TIMING_ADDR)
         self._send_byte(self.GP8302_STORE_TIMING_CMD1)
-        self.i2c.stop()
+        self._stop_signal()
 
-        self.i2c.start()
-        self._send_byte(self._addr << 1)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self.i2c.stop()
+        self._start_signal()
+        self._send_byte(self._addr<<1, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
+        self._stop_signal()
 
         utime.sleep(self.GP8302_STORE_TIMING_DELAY)
 
-        self.i2c.start()
-        self._send_byte(self.GP8302_STORE_TIMING_HEAD)
-        self.i2c.stop()
-        self.i2c.start()
+        self._start_signal()
+        self._send_byte(self.GP8302_STORE_TIMING_HEAD, 0, 3, False)
+        self._stop_signal()
+        self._start_signal()
         self._send_byte(self.GP8302_STORE_TIMING_ADDR)
         self._send_byte(self.GP8302_STORE_TIMING_CMD2)
-        self.i2c.stop()
+        self._stop_signal()
 
-    def _send_byte(self, data):
-        # ensure 8 bits only
+        # re-initialize I2C
+        self._initializeI2C()
+
+
+    def _start_signal(self):
+        self._scl.high()
+        self._sda.high()
+        utime.sleep(self.I2C_CYCLE_BEFORE)
+        self._sda.low()
+        utime.sleep(self.I2C_CYCLE_AFTER)
+        self._scl.low()
+        utime.sleep(self.I2C_CYCLE_TOTAL)
+  
+    def _stop_signal(self):
+        self._sda.low()
+        utime.sleep(self.I2C_CYCLE_BEFORE)
+        self._scl.high()
+        utime.sleep(self.I2C_CYCLE_TOTAL)
+        self._sda.high()
+        utime.sleep(self.I2C_CYCLE_TOTAL)
+
+    def _recv_ack(self, ack = 0):
+        ack_ = 0
+        error_time = 0
+        self._sda = machine.Pin(self._sda, machine.Pin.IN)
+
+        utime.sleep(self.I2C_CYCLE_BEFORE)
+        self._scl.high()
+        utime.sleep(self.I2C_CYCLE_AFTER)
+        while self._sda.value() != ack:
+            utime.sleep(0.000001)
+            error_time += 1
+            if error_time > 250:
+                break
+        ack_ = self._sda.value() # suspicious to read the value here, should save it before the while loop?
+        utime.sleep(self.I2C_CYCLE_BEFORE)
+        self._scl.low()
+        utime.sleep(self.I2C_CYCLE_AFTER)
+        self._sda = machine.Pin(self._sda, machine.Pin.OUT)
+        return ack_
+
+    def _send_byte(self, data, ack = 0, bits = 8, flag = True):
+        i = bits
+        # Ensure 8 bits only
         data = data & 0xFF
-        return self.i2c.write(data.to_bytes(1, 'big'))
+        while i > 0:
+            i -= 1
+            if data & (1 << i):
+                self._sda.high()
+            else:
+                self._sda.low()
+            utime.sleep(self.I2C_CYCLE_BEFORE)
+            self._scl.high()
+            utime.sleep(self.I2C_CYCLE_TOTAL)
+            self._scl.low()
+            utime.sleep(self.I2C_CYCLE_AFTER)
+        if flag:
+            return self._recv_ack(ack)
+        else:
+            self._sda.low()
+            self._scl.high()
+        return ack
+
