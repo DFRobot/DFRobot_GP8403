@@ -15,6 +15,7 @@ This I2C to 0-5V/0-10V DAC module can be used to output voltage of 0-5V or 0-10V
 ## Table of Contents
   - [Summary](#summary)
   - [Methods](#methods)
+  - [Examples](#examples)
   - [Compatibility](#compatibility)
   - [History](#history)
   - [Credits](#credits)
@@ -53,6 +54,30 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
     
 ```
 
+## Examples
+
+```python
+  from DFRobot_GP8403 import *
+  import utime
+ 
+  # Init DAC with desired address, pins, and hard/soft mode
+  DAC = DfrobotGP8403 (0x58, 5, 4, 400000, False) 
+  
+  while DAC.begin() != 0:
+    print("init error")
+    utime.sleep(1)
+  print("init succeed")
+
+  # Set output range
+  DAC.set_dac_outrange(OUTPUT_RANGE_10V)
+  
+  # Output value from DAC channel 0
+  DAC.set_dac_out_voltage(6,0)
+
+  # Store data in the chip
+  DAC.store()
+```
+
 ## Compatibility
 
 | MCU         | Work Well | Work Wrong | Untested | Remarks |
@@ -70,11 +95,11 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
 
 ## History
 
-- TBD - Version 1.0.0 released.
+- 2023-03-31 - Version 0.0.1 beta.
 
 ## Credits
 
-Written by Rémi Bréval, 2023.
+Written by Rémi, 2023.
 
 
 

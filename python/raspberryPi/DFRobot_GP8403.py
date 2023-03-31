@@ -115,6 +115,9 @@ class DFRobot_GP8403():
   ## The second half cycle of the total I2C communication cycle 3us      
   I2C_CYCLE_AFTER             =    0.000003 
   
+  # Store procedure interval delay time: 10ms (1000us) 
+  # (should be more than 7ms according to spec)
+  GP8302_STORE_TIMING_DELAY = 0.0000010
   
     
   def __init__(self,addr):

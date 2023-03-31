@@ -39,13 +39,14 @@ class DfrobotGP8403():
     # The command 2 to enter store timing
     GP8302_STORE_TIMING_CMD2 = 0x00
     # Total I2C communication cycle 5us
-    I2C_CYCLE_TOTAL = 0.000005
+    I2C_CYCLE_TOTAL = 5
     # The first half cycle of the total I2C communication cycle 2us
-    I2C_CYCLE_BEFORE = 0.000002
+    I2C_CYCLE_BEFORE = 2
     # The second half cycle of the total I2C communication cycle 3us
-    I2C_CYCLE_AFTER = 0.000003
-    # Store procedure interval delay time: 10ms, more than 7ms
-    GP8302_STORE_TIMING_DELAY = 10
+    I2C_CYCLE_AFTER = 3
+    # Store procedure interval delay time: 10ms (1000us) 
+    # (should be more than 7ms according to spec)
+    GP8302_STORE_TIMING_DELAY = 1000
 
 
     def __init__(self, addr, sclpin, sdapin, i2cfreq, hard = False):
@@ -155,7 +156,7 @@ class DfrobotGP8403():
         self._send_byte(self.GP8302_STORE_TIMING_CMD2, 1)
         self._stop_signal()
 
-        utime.sleep(self.GP8302_STORE_TIMING_DELAY)
+        utime.sleep_us(self.GP8302_STORE_TIMING_DELAY)
 
         self._start_signal()
         self._send_byte(self.GP8302_STORE_TIMING_HEAD, 0, 3, False)
@@ -172,37 +173,37 @@ class DfrobotGP8403():
     def _start_signal(self):
         self._scl.high()
         self._sda.high()
-        utime.sleep(self.I2C_CYCLE_BEFORE)
+        utime.sleep_us(self.I2C_CYCLE_BEFORE)
         self._sda.low()
-        utime.sleep(self.I2C_CYCLE_AFTER)
+        utime.sleep_us(self.I2C_CYCLE_AFTER)
         self._scl.low()
-        utime.sleep(self.I2C_CYCLE_TOTAL)
+        utime.sleep_us(self.I2C_CYCLE_TOTAL)
   
     def _stop_signal(self):
         self._sda.low()
-        utime.sleep(self.I2C_CYCLE_BEFORE)
+        utime.sleep_us(self.I2C_CYCLE_BEFORE)
         self._scl.high()
-        utime.sleep(self.I2C_CYCLE_TOTAL)
+        utime.sleep_us(self.I2C_CYCLE_TOTAL)
         self._sda.high()
-        utime.sleep(self.I2C_CYCLE_TOTAL)
+        utime.sleep_us(self.I2C_CYCLE_TOTAL)
 
     def _recv_ack(self, ack = 0):
         ack_ = 0
         error_time = 0
         self._sda = machine.Pin(self._sda, machine.Pin.IN)
 
-        utime.sleep(self.I2C_CYCLE_BEFORE)
+        utime.sleep_us(self.I2C_CYCLE_BEFORE)
         self._scl.high()
-        utime.sleep(self.I2C_CYCLE_AFTER)
+        utime.sleep_us(self.I2C_CYCLE_AFTER)
         while self._sda.value() != ack:
-            utime.sleep(0.000001)
+            utime.sleep_us(0.000001)
             error_time += 1
             if error_time > 250:
                 break
         ack_ = self._sda.value() # suspicious to read the value here, should save it before the while loop?
-        utime.sleep(self.I2C_CYCLE_BEFORE)
+        utime.sleep_us(self.I2C_CYCLE_BEFORE)
         self._scl.low()
-        utime.sleep(self.I2C_CYCLE_AFTER)
+        utime.sleep_us(self.I2C_CYCLE_AFTER)
         self._sda = machine.Pin(self._sda, machine.Pin.OUT)
         return ack_
 
@@ -216,11 +217,11 @@ class DfrobotGP8403():
                 self._sda.high()
             else:
                 self._sda.low()
-            utime.sleep(self.I2C_CYCLE_BEFORE)
+            utime.sleep_us(self.I2C_CYCLE_BEFORE)
             self._scl.high()
-            utime.sleep(self.I2C_CYCLE_TOTAL)
+            utime.sleep_us(self.I2C_CYCLE_TOTAL)
             self._scl.low()
-            utime.sleep(self.I2C_CYCLE_AFTER)
+            utime.sleep_us(self.I2C_CYCLE_AFTER)
         if flag:
             return self._recv_ack(ack)
         else:

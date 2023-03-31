@@ -18,11 +18,11 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 from DFRobot_GP8403 import *
 
 DAC = DFRobot_GP8403(0x58)  
-status = DAC.begin()
-if(status != 0):
-  while True:time.sleep(1)
-  
+while DAC.begin() != 0:
+    print("init error")
+    time.sleep(1)
 print("init succeed")
+  
 #Set output range  
 DAC.set_DAC_outrange(OUTPUT_RANGE_5V)
 while True:
