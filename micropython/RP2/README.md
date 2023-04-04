@@ -57,22 +57,23 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
 ## Examples
 
 ```python
-  from DFRobot_GP8403 import *
+  from DfrobotGP8403 import *
   import utime
- 
+
   # Init DAC with desired address, pins, and hard/soft mode
-  DAC = DfrobotGP8403 (0x58, 5, 4, 400000, False) 
-  
+  DAC = DfrobotGP8403 (0x5F, 5, 4, 400000, False)
+
   while DAC.begin() != 0:
-    print("init error")
-    utime.sleep(1)
-  print("init succeed")
+      print("Init error")
+      utime.sleep(1)
+  print("Init succeed")
 
   # Set output range
-  DAC.set_dac_outrange(OUTPUT_RANGE_10V)
-  
+  DAC.set_dac_out_range(OUTPUT_RANGE_10V)
+
   # Output value from DAC channel 0
-  DAC.set_dac_out_voltage(6,0)
+  # Value in mV = 0-5000 or 0-10000 depending on range
+  DAC.set_dac_out_voltage(5000,0)
 
   # Store data in the chip
   DAC.store()

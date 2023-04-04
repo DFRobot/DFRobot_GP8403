@@ -59,16 +59,18 @@ class DfrobotGP8403():
         :param i2cfreq: I2C frequency
         :param hard: I2C or SoftI2C
         """
-
         self._addr = addr
         self.outPutSetRange = 0x01
         self.voltage = 5000
+        self._sclpin = sclpin
+        self._sdapin = sdapin
         self._scl = machine.Pin(sclpin)
         self._sda = machine.Pin(sdapin)
         self._i2cfreq = i2cfreq
         self.dataTransmission = 0
         self._hard = hard
 
+        # Need it because "store" bit bangs and uninitialize the I2C bus
         self._initializeI2C()
 
     def _initializeI2C(self):
@@ -87,6 +89,7 @@ class DfrobotGP8403():
 
     def begin(self):
         # Initialize the sensor
+        print("Found i2c addresses: ", self.i2c.scan())
         if self.i2c.readfrom(self._addr, 1) != 0:
             return 0
         return 1
@@ -95,32 +98,40 @@ class DfrobotGP8403():
         """
         Set DAC output range
         :param mode: 5V or 10V OUTPUT_RANGE mode
-        """
+        """       
         if mode == OUTPUT_RANGE_5V:
             self.voltage = 5000
         elif mode == OUTPUT_RANGE_10V:
             self.voltage = 10000
-        self.i2c.writeto_mem(self._addr, self.outPutSetRange, mode)
+        
+        b = bytearray(1)
+        b[0] = mode
+        self.i2c.writeto_mem(self._addr, self.outPutSetRange, b, addrsize=8)
+        
 
     def set_dac_out_voltage(self, data, channel):
         """
         Select DAC output channel & range
-        :param data: Set output data
+        :param data: Set voltage in mV between 0-5000 or 0-10000 depending on range
         :param channel: Set output channel
         """
-        self.dataTransmission = ((float(data) / self.voltage) * 4095)
+        self.dataTransmission = int((float(data) / self.voltage) * 4095)
         self.dataTransmission = int(self.dataTransmission) << 4
         self._send_data(self.dataTransmission, channel)
+        
 
     def _send_data(self, data, channel):
         if channel == 0:
-            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
-
+            b = bytearray(3)
+            b[0] = self.GP8403_CONFIG_CURRENT_REG
+            b[1] = data & 0xFF
+            b[2] = (data >> 8) & 0xFF
+            self.i2c.writeto(self._addr, b)
         elif channel == 1:
-            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, data)
+            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, bytearray([data]))
         else:
             self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
-            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, data)
+            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, bytearray([data]))
 
 
     def store(self):
@@ -129,12 +140,11 @@ class DfrobotGP8403():
         it will be enabled when the module is powered down and restarts
         
         This is done with bit-banging because the chip does custom I2C with less than 1 Byte data.
-        """
-        
+        """       
         # Re-initialise Pin because it was initialized 
         # with SoftI2C and we need to use it as GPIO
-        self._scl = machine.Pin(self._scl, machine.Pin.OUT)
-        self._sda = machine.Pin(self._sda, machine.Pin.OUT)
+        _scl = machine.Pin(self._sclpin, machine.Pin.OUT)
+        _sda = machine.Pin(self._sdapin, machine.Pin.OUT)
 
         self._start_signal()
         self._send_byte(self.GP8302_STORE_TIMING_HEAD, 0, 3, False)
@@ -190,7 +200,7 @@ class DfrobotGP8403():
     def _recv_ack(self, ack = 0):
         ack_ = 0
         error_time = 0
-        self._sda = machine.Pin(self._sda, machine.Pin.IN)
+        self._sda = machine.Pin(self._sdapin, machine.Pin.IN)
 
         utime.sleep_us(self.I2C_CYCLE_BEFORE)
         self._scl.high()
@@ -204,7 +214,7 @@ class DfrobotGP8403():
         utime.sleep_us(self.I2C_CYCLE_BEFORE)
         self._scl.low()
         utime.sleep_us(self.I2C_CYCLE_AFTER)
-        self._sda = machine.Pin(self._sda, machine.Pin.OUT)
+        self._sda = machine.Pin(self._sdapin, machine.Pin.OUT)
         return ack_
 
     def _send_byte(self, data, ack = 0, bits = 8, flag = True):
