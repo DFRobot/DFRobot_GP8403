@@ -1,6 +1,6 @@
 # DFRobot_GP8403
 
-This Fork contains a port for Raspberry Pi Pico in Python in RP2 folder.
+Update: port for Raspberry Pi Pico in Python in RP2 folder.
 
 This I2C to 0-5V/0-10V DAC module can be used to output voltage of 0-5V or 0-10V. It has the following features:
 1. Output voltage of 0-5V or 0-10V.

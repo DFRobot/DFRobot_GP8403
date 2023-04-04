@@ -1,7 +1,6 @@
 # DFRobot_GP8403
 
 Port of the Library for Raspberry Pi Pico. 
-Work in Progress. Not released yet.
 
 This I2C to 0-5V/0-10V DAC module can be used to output voltage of 0-5V or 0-10V. It has the following features:
 1. Output voltage of 0-5V or 0-10V.
@@ -96,7 +95,7 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
 
 ## History
 
-- 2023-03-31 - Version 0.0.1 beta.
+- 2023-04-03 - Version 1.0.0.
 
 ## Credits
 
