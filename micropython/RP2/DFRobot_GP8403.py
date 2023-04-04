@@ -121,17 +121,19 @@ class DfrobotGP8403():
         
 
     def _send_data(self, data, channel):
-        if channel == 0:
+        if channel == 0 or channel == 3:
             b = bytearray(3)
             b[0] = self.GP8403_CONFIG_CURRENT_REG
             b[1] = data & 0xFF
             b[2] = (data >> 8) & 0xFF
             self.i2c.writeto(self._addr, b)
-        elif channel == 1:
-            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, bytearray([data]))
-        else:
-            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG, data)
-            self.i2c.writeto_mem(self._addr, self.GP8403_CONFIG_CURRENT_REG << 1, bytearray([data]))
+
+        if channel == 1 or channel == 3:
+            b = bytearray(3)
+            b[0] = self.GP8403_CONFIG_CURRENT_REG << 1
+            b[1] = data & 0xFF
+            b[2] = (data >> 8) & 0xFF
+            self.i2c.writeto(self._addr, b)
 
 
     def store(self):
