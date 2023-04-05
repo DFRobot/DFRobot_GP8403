@@ -59,23 +59,40 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
   from DfrobotGP8403 import *
   import utime
 
-  # Init DAC with desired address, pins, and hard/soft mode
-  DAC = DfrobotGP8403 (0x5F, 5, 4, 400000, False)
+  def store():
+      # Store data in the chip
+      DAC.store()
 
-  while DAC.begin() != 0:
-      print("Init error")
-      utime.sleep(1)
-  print("Init succeed")
+  def wave():
+      # Triangle with 180 phase output 1 and 2
+      vmax = DAC.get_dac_out_range()
+      for i in range(10):
+          for x in range(vmax+1):
+              DAC.set_dac_out_voltage(x*1000,0)
+              DAC.set_dac_out_voltage((vmax-x)*1000,1)
+              utime.sleep(0.25)
 
-  # Set output range
-  DAC.set_dac_out_range(OUTPUT_RANGE_10V)
+          for x in reversed(range(vmax+1)):
+              DAC.set_dac_out_voltage(x*1000,0)
+              DAC.set_dac_out_voltage((vmax-x)*1000,1)
+              utime.sleep(0.25)
 
-  # Output value from DAC channel 0
-  # Value in mV = 0-5000 or 0-10000 depending on range
-  DAC.set_dac_out_voltage(5000,0)
+  if __name__ == "__main__":   
+      # Init DAC with desired address, pins, and hard/soft mode
+      DAC = DfrobotGP8403 (0x5F, 5, 4, 400000, True)
 
-  # Store data in the chip
-  DAC.store()
+      while DAC.begin() != 0:
+          print("Init error")
+          utime.sleep(1)
+      print("Init succeed")
+
+      # Set output range
+      DAC.set_dac_out_range(OUTPUT_RANGE_10V)
+
+      # Output value from DAC channel 0
+      # Value in mV = 0-5000 or 0-10000 depending on range
+      DAC.set_dac_out_voltage(1000,0)
+      DAC.set_dac_out_voltage(2000,1)
 ```
 
 ## Compatibility
@@ -96,6 +113,7 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
 ## History
 
 - 2023-04-03 - Version 1.0.0.
+- 2023-04-04 - Version 1.0.1.
 
 ## Credits
 

@@ -85,14 +85,24 @@ class DfrobotGP8403():
             self.i2c = machine.SoftI2C(scl=self._scl,
                                 sda=self._sda,
                                 freq=self._i2cfreq)
-
+            
 
     def begin(self):
-        # Initialize the sensor
+        # List devices
         print("Found i2c addresses: ", self.i2c.scan())
-        if self.i2c.readfrom(self._addr, 1) != 0:
-            return 0
-        return 1
+        
+        # Initialize the sensor
+        try:
+            if self.i2c.readfrom(self._addr, 1) != 0:
+                return 0
+            return 1            
+        except OSError as e:
+            print("Error: {0} on address {1}".format(e, hex(self._addr)))
+            return 1
+        except Exception as e: # exception if read_byte fails
+            print("Error unk: {0} on address {1}".format(e, hex(self._addr)))
+            return 1
+    
 
     def set_dac_out_range(self, mode):
         """
@@ -108,6 +118,8 @@ class DfrobotGP8403():
         b[0] = mode
         self.i2c.writeto_mem(self._addr, self.outPutSetRange, b, addrsize=8)
         
+    def get_dac_out_range(self):
+        return self.voltage
 
     def set_dac_out_voltage(self, data, channel):
         """
