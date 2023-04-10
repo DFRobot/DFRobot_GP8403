@@ -220,7 +220,7 @@ class DfrobotGP8403():
         self._scl.high()
         utime.sleep_us(self.I2C_CYCLE_AFTER)
         while self._sda.value() != ack:
-            utime.sleep_us(0.000001)
+            utime.sleep_us(1)
             error_time += 1
             if error_time > 250:
                 break
