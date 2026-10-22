@@ -24,18 +24,34 @@ The Arduino library is provided for the I2C 0-5V/0-10V DAC module to set and sav
 3. Save the voltage config(Will not be lost when powered down).
 
 ## Installation
-1. To use this library, first download the library file<br>
-```python
-sudo git clone https://github.com/DFRobot/DFRobot_GP8302
-```
-2. Open and run the routine. To execute a routine demo_x.py, enter python demo_x.py in the command line. For example, to execute the demo_set_current.py routine, you need to enter :<br>
 
-```python
-python demo_set_current.py 
-or
-python2 demo_set_current.py 
-or 
-python3 demo_set_current.py
+### 1. Create and activate a virtual environment
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 2. Install required dependencies
+```bash
+pip install smbus2 rpi-gpio
+```
+
+### 3. Download the library
+To use this library, download the library file:
+```bash
+sudo git clone https://github.com/DFRobot/DFRobot_GP8403
+```
+
+### 4. Running the examples
+Open and run the routine. The examples are in the `examples` folder. For example, to run output_data.py, enter:
+```bash
+cd DFRobot_GP8403/python/raspberryPi/examples
+python3 output_data.py
+```
+
+### 5. Deactivate virtual environment when done
+```bash
+deactivate
 ```
 
 ## Methods
